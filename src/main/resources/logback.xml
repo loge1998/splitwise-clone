@@ -1,0 +1,50 @@
+<configuration>
+    <property name="pattern"
+              value="%date [%X{traceId}] [%X{spanId}] %-5level [%thread] %logger{5} {%line} - %msg%n%rEx"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>DENY</onMatch>
+        </filter>
+        <if condition='isDefined("ENABLE_LOGBACK_ENCODER")'>
+            <then>
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                    <timeZone>UTC</timeZone>
+                </encoder>
+            </then>
+            <else>
+                <encoder>
+                    <pattern>${pattern}</pattern>
+                </encoder>
+            </else>
+        </if>
+    </appender>
+
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <if condition='isDefined("ENABLE_LOGBACK_ENCODER")'>
+            <then>
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                    <timeZone>UTC</timeZone>
+                </encoder>
+            </then>
+            <else>
+                <encoder>
+                    <pattern>${pattern}</pattern>
+                </encoder>
+            </else>
+        </if>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="STDERR"/>
+    </root>
+
+</configuration>
