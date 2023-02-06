@@ -1,6 +1,9 @@
 package com.splitwise.controller;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import com.splitwise.exceptions.BadRequestException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -19,6 +22,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<String> handleClientError(HttpClientErrorException e) {
     logger.error(e.getStatusText() + ", status:" + e.getStatusCode(), e);
     return ResponseEntity.status(e.getStatusCode()).body(e.getStatusText());
+  }
+
+  @ExceptionHandler({BadRequestException.class})
+  public ResponseEntity<String> handleBadRequestError(RuntimeException e) {
+    logger.error(e.getMessage(), e);
+    return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
   }
 
   @ExceptionHandler({Exception.class})

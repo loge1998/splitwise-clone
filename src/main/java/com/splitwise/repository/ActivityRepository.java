@@ -4,5 +4,5 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.splitwise.model.Activity;
 
-public interface ActivityRepository extends CrudRepository<Activity,Integer> {
+public interface ActivityRepository extends CrudRepository<Activity,Long> {
 }
