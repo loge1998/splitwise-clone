@@ -24,7 +24,7 @@ public class User {
   @Column(name = "name")
   private String name;
 
-  @Column(name = "email_id")
+  @Column(name = "email_id", unique = true)
   private String emailId;
 
   @Column(name = "created_at")
