@@ -45,12 +45,18 @@ public class ActivityService {
   }
 
   public void addUserToActivity(AddUserToActivityRequest request) {
+    validateActivityId(request.activityId());
     validateUserIds(request.userIds());
     request.userIds()
       .stream()
       .map(userId -> new UserActivityMappingId(userId, request.activityId()))
       .map(UserActivityMapping::new)
       .forEach(userActivityMappingRepository::save);
+  }
+
+  private void validateActivityId(Long activityId) {
+    activityRepository.findById(activityId)
+      .orElseThrow(() -> new ResourceNotFoundException("Received request with unknown activity: " + activityId));
   }
 
   private void validateUserIds(List<Long> userIds) {
