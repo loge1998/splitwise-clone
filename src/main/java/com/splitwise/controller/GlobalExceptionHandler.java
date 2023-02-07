@@ -1,11 +1,9 @@
 package com.splitwise.controller;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
-import com.splitwise.exceptions.BadRequestException;
+import com.splitwise.exceptions.ResourceNotFoundException;
 
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +22,10 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(e.getStatusCode()).body(e.getStatusText());
   }
 
-  @ExceptionHandler({BadRequestException.class})
+  @ExceptionHandler({ResourceNotFoundException.class})
   public ResponseEntity<String> handleBadRequestError(RuntimeException e) {
     logger.error(e.getMessage(), e);
-    return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+    return ResponseEntity.status(NOT_FOUND).body(e.getMessage());
   }
 
   @ExceptionHandler({Exception.class})

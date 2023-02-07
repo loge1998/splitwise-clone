@@ -1,22 +1,21 @@
 package com.splitwise.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import com.splitwise.controller.request.AddUserToActivityRequest;
-
-import com.splitwise.exceptions.BadRequestException;
-import com.splitwise.model.UserActivityMapping;
-import com.splitwise.model.UserActivityMappingId;
-import com.splitwise.repository.UserActivityMappingRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import com.splitwise.controller.request.AddActivityRequest;
+import com.splitwise.controller.request.AddUserToActivityRequest;
+import com.splitwise.exceptions.ResourceNotFoundException;
 import com.splitwise.model.Activity;
+import com.splitwise.model.UserActivityMapping;
+import com.splitwise.model.UserActivityMappingId;
 import com.splitwise.repository.ActivityRepository;
+import com.splitwise.repository.UserActivityMappingRepository;
 
 @Service
 @Slf4j
@@ -63,7 +62,19 @@ public class ActivityService {
     {
       String message = "Received request with unknown users: " + unknownUserIds;
       log.error(message);
-      throw new BadRequestException(message);
+      throw new ResourceNotFoundException(message);
     }
+  }
+
+  public Optional<Activity> getActivityById(long activityId) {
+    return activityRepository.findById(activityId);
+  }
+
+  public List<Activity> getActivitiesByUserId(long userId) {
+    validateUserIds(List.of(userId));
+    return userActivityMappingRepository.findByMappingIdUserId(userId)
+      .stream()
+      .flatMap(mapping -> getActivityById(mapping.getMappingId().getActivityId()).stream())
+      .collect(Collectors.toList());
   }
 }

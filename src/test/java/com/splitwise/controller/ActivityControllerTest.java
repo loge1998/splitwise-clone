@@ -6,8 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
-import com.splitwise.model.UserActivityMappingId;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,8 @@ import com.splitwise.controller.request.AddActivityRequest;
 import com.splitwise.controller.request.AddUserToActivityRequest;
 import com.splitwise.model.Activity;
 import com.splitwise.model.User;
+import com.splitwise.model.UserActivityMapping;
+import com.splitwise.model.UserActivityMappingId;
 import com.splitwise.repository.ActivityRepository;
 import com.splitwise.repository.UserActivityMappingRepository;
 import com.splitwise.repository.UserRepository;
@@ -69,14 +69,14 @@ public class ActivityControllerTest {
   }
 
   @Test
-  public void shouldReturnBadRequestWhenProvidedUserInAddActivityRequestIsUnknown() throws Exception {
+  public void addActivity_shouldReturnNotFound_WhenProvidedUserInAddActivityRequestIsUnknown() throws Exception {
     AddActivityRequest request = new AddActivityRequest("testActivity", List.of(1L));
     String message = parser.toJson(request).get();
     mvc.perform(MockMvcRequestBuilders.post("/activities")
         .content(message)
         .header("Content-Type", "application/json")
         .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isBadRequest())
+      .andExpect(status().isNotFound())
       .andExpect(jsonPath("$").value("Received request with unknown users: [1]"));
   }
 
@@ -97,7 +97,7 @@ public class ActivityControllerTest {
   }
 
   @Test
-  public void shouldReturnBadRequestWhenProvidedUserIsUnknown() throws Exception {
+  public void addUserToActivity_ShouldReturnBadRequest_WhenProvidedUserIsUnknown() throws Exception {
     Activity activity = addActivity(new Activity("testActivity"));
     AddUserToActivityRequest request = new AddUserToActivityRequest(activity.getId(), List.of(1L));
     String message = parser.toJson(request).get();
@@ -105,8 +105,62 @@ public class ActivityControllerTest {
         .content(message)
         .header("Content-Type", "application/json")
         .accept(MediaType.APPLICATION_JSON))
-      .andExpect(status().isBadRequest())
+      .andExpect(status().isNotFound())
       .andExpect(jsonPath("$").value("Received request with unknown users: [1]"));
+  }
+
+  @Test
+  public void getActivityById_ShouldReturnActivity_WhenActivityIdIsPresent() throws Exception {
+    Activity activity = addActivity(new Activity("testActivity"));
+    String activityId = String.valueOf(activity.getId());
+    mvc.perform(MockMvcRequestBuilders.get("/activities/" + activityId)
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.name").value(activity.getName()))
+      .andExpect(jsonPath("$.id").value(activity.getId()))
+      .andExpect(jsonPath("$.createdAt").exists())
+      .andExpect(jsonPath("$.updatedAt").exists());
+  }
+
+  @Test
+  public void getActivityById_ShouldReturnNotFound_WhenActivityIdIsNotPresent() throws Exception {
+    mvc.perform(MockMvcRequestBuilders.get("/activities/10")
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void getActivityByUserId_ShouldReturnNotFound_WhenUserIdIsNotPresent() throws Exception {
+    mvc.perform(MockMvcRequestBuilders.get("/activities")
+        .queryParam("userid", "1")
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void getActivityByUserId_ShouldReturnAllActivityThatUserBelongsTo() throws Exception {
+    User userToAdd = addUser(new User("testUser", "testEmail"));
+    Activity firstActivity = addActivity(new Activity("testActivity-1"));
+    Activity secondActivity = addActivity(new Activity("testActivity-2"));
+    addMapping(userToAdd.getId(), firstActivity.getId());
+    addMapping(userToAdd.getId(), secondActivity.getId());
+
+    mvc.perform(MockMvcRequestBuilders.get("/activities")
+        .queryParam("userid", String.valueOf(userToAdd.getId()))
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.[0].name").value(firstActivity.getName()))
+      .andExpect(jsonPath("$.[0].id").value(firstActivity.getId()))
+      .andExpect(jsonPath("$.[0].createdAt").exists())
+      .andExpect(jsonPath("$.[0].updatedAt").exists())
+      .andExpect(jsonPath("$.[1].name").value(secondActivity.getName()))
+      .andExpect(jsonPath("$.[1].id").value(secondActivity.getId()))
+      .andExpect(jsonPath("$.[1].createdAt").exists())
+      .andExpect(jsonPath("$.[1].updatedAt").exists());
+  }
+
+  private UserActivityMapping addMapping(long userId, long activityId) {
+    return userActivityMappingRepository.save(new UserActivityMapping(new UserActivityMappingId(userId, activityId)));
   }
 
   private Activity addActivity(Activity activity) {
