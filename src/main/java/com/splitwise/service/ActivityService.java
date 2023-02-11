@@ -54,7 +54,7 @@ public class ActivityService {
       .forEach(userActivityMappingRepository::save);
   }
 
-  private void validateActivityId(Long activityId) {
+  public void validateActivityId(Long activityId) {
     activityRepository.findById(activityId)
       .orElseThrow(() -> new ResourceNotFoundException("Received request with unknown activity: " + activityId));
   }

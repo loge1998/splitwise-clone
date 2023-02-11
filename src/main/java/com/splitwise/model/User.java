@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,9 +29,11 @@ public class User {
   private String emailId;
 
   @Column(name = "created_at")
+  @JsonIgnore
   private LocalDateTime createdAt;
 
   @Column(name = "updated_at")
+  @JsonIgnore
   private LocalDateTime updatedAt;
 
   public User(String name, String emailId) {

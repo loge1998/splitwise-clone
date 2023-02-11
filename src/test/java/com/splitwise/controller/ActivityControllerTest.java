@@ -63,9 +63,7 @@ public class ActivityControllerTest {
         .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.name").value("testActivity"))
-      .andExpect(jsonPath("$.id").exists())
-      .andExpect(jsonPath("$.createdAt").exists())
-      .andExpect(jsonPath("$.updatedAt").exists());
+      .andExpect(jsonPath("$.id").exists());
   }
 
   @Test
@@ -117,9 +115,7 @@ public class ActivityControllerTest {
         .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.name").value(activity.getName()))
-      .andExpect(jsonPath("$.id").value(activity.getId()))
-      .andExpect(jsonPath("$.createdAt").exists())
-      .andExpect(jsonPath("$.updatedAt").exists());
+      .andExpect(jsonPath("$.id").value(activity.getId()));
   }
 
   @Test
@@ -151,12 +147,8 @@ public class ActivityControllerTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.[0].name").value(firstActivity.getName()))
       .andExpect(jsonPath("$.[0].id").value(firstActivity.getId()))
-      .andExpect(jsonPath("$.[0].createdAt").exists())
-      .andExpect(jsonPath("$.[0].updatedAt").exists())
       .andExpect(jsonPath("$.[1].name").value(secondActivity.getName()))
-      .andExpect(jsonPath("$.[1].id").value(secondActivity.getId()))
-      .andExpect(jsonPath("$.[1].createdAt").exists())
-      .andExpect(jsonPath("$.[1].updatedAt").exists());
+      .andExpect(jsonPath("$.[1].id").value(secondActivity.getId()));
   }
 
   private UserActivityMapping addMapping(long userId, long activityId) {

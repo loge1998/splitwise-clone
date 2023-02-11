@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,9 +26,11 @@ public class Activity {
   private String name;
 
   @Column(name = "created_at")
+  @JsonIgnore
   private LocalDateTime createdAt;
 
   @Column(name = "updated_at")
+  @JsonIgnore
   private LocalDateTime updatedAt;
 
   public Activity(String name) {

@@ -1,5 +1,7 @@
 package com.splitwise.controller;
 
+import java.util.List;
+
 import com.splitwise.controller.request.AddExpenseToActivityRequest;
 
 import com.splitwise.model.Expense;
@@ -22,5 +24,10 @@ public class ActivityExpenseController {
   @PostMapping
   public ResponseEntity<Expense> addExpense(@RequestBody AddExpenseToActivityRequest request) {
     return ResponseEntity.ok(activityExpenseService.addExpenseToActivity(request));
+  }
+
+  @GetMapping
+  public ResponseEntity<List<Expense>> getExpenses(@PathVariable("activityId") Long activityId) {
+    return ResponseEntity.ok(activityExpenseService.getExpensesForActivity(activityId));
   }
 }

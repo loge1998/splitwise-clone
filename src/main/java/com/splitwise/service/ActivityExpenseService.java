@@ -1,6 +1,7 @@
 package com.splitwise.service;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import com.splitwise.controller.request.AddUserToActivityRequest;
@@ -33,5 +34,10 @@ public class ActivityExpenseService {
     var activity = activityService.getActivityById(request.activityId())
       .orElseThrow(() -> new ResourceNotFoundException("Provided Activity not found: " + request.activityId()));
     return expenseRepository.save(new Expense(request.description(), user, request.totalAmount(), activity));
+  }
+
+  public List<Expense> getExpensesForActivity(long activityId) {
+    activityService.validateActivityId(activityId);
+    return expenseRepository.findAllByActivityId(activityId);
   }
 }

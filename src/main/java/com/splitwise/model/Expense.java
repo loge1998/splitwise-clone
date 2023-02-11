@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,9 +37,11 @@ public class Expense {
   private Activity activity;
 
   @Column(name = "created_at")
+  @JsonIgnore
   private LocalDateTime createdAt;
 
   @Column(name = "updated_at")
+  @JsonIgnore
   private LocalDateTime updatedAt;
 
   public Expense(String description, User userWhoPaid, BigDecimal totalAmount, Activity activity) {

@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.splitwise.model.Expense;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,10 +69,10 @@ class ActivityExpenseControllerTest {
 
   @Test
   void addExpenseToActivity_ShouldReturnNotFound_WhenUserIdNotFound() throws Exception {
-    addActivity(new Activity("testActivity"));
-    AddExpenseToActivityRequest request = new AddExpenseToActivityRequest(1L, "testDescription", BigDecimal.TEN, 2L, List.of(1L));
+    Activity addedActivity = addActivity(new Activity("testActivity"));
+    AddExpenseToActivityRequest request = new AddExpenseToActivityRequest(addedActivity.getId(), "testDescription", BigDecimal.TEN, 2L, List.of(1L));
     String message = parser.toJson(request).get();
-    mvc.perform(MockMvcRequestBuilders.post("/activities/1/expenses")
+    mvc.perform(MockMvcRequestBuilders.post("/activities/"+ addedActivity.getId() + "/expenses")
         .content(message)
         .header("Content-Type", "application/json")
         .accept(MediaType.APPLICATION_JSON))
@@ -99,14 +101,40 @@ class ActivityExpenseControllerTest {
       .andDo(print())
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.description").value("testDescription"))
-      .andExpect(jsonPath("$.id").exists())
-      .andExpect(jsonPath("$.createdAt").exists())
-      .andExpect(jsonPath("$.updatedAt").exists());
+      .andExpect(jsonPath("$.id").exists());
 
     assertTrue(userRepository.findById(firstUser.getId()).isPresent());
     assertTrue(userRepository.findById(secondUser.getId()).isPresent());
     assertTrue(activityRepository.findById(activity.getId()).isPresent());
     assertEquals(1, expenseRepository.findAll().size());
+  }
+
+  @Test
+  public void getExpensesForActivity_ShouldReturnNotFound_IfActivityNotPresent() throws Exception {
+    mvc.perform(MockMvcRequestBuilders.get("/activities/1/expenses")
+        .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void getExpensesForActivity_ShouldReturnExpenses() throws Exception {
+    User user = userRepository.save(new User("testName", "testEmail"));
+    Activity activity = activityRepository.save(new Activity("testActivity"));
+    expenseRepository.save(new Expense("testDescription-1", user, BigDecimal.TEN, activity));
+    expenseRepository.save(new Expense("testDescription-2", user, BigDecimal.ONE, activity));
+    mvc.perform(MockMvcRequestBuilders.get("/activities/"+ activity.getId() +"/expenses")
+        .accept(MediaType.APPLICATION_JSON))
+      .andDo(print())
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isArray())
+      .andExpect(jsonPath("$.[0].description").value("testDescription-1"))
+      .andExpect(jsonPath("$.[0].totalAmount").value("10.0"))
+      .andExpect(jsonPath("$.[0].userWhoPaid.name").value("testName"))
+      .andExpect(jsonPath("$.[0].activity.name").value("testActivity"))
+      .andExpect(jsonPath("$.[1].description").value("testDescription-2"))
+      .andExpect(jsonPath("$.[1].totalAmount").value("1.0"))
+      .andExpect(jsonPath("$.[1].userWhoPaid.name").value("testName"))
+      .andExpect(jsonPath("$.[1].activity.name").value("testActivity"));
   }
 
   private Activity addActivity(Activity activity) {
