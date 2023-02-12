@@ -23,9 +23,6 @@ public abstract class BaseControllerConfig {
   protected UserRepository userRepository;
 
   @Autowired
-  protected UserActivityMappingRepository userActivityMappingRepository;
-
-  @Autowired
   protected JsonMessageParser parser;
 
   @Autowired
@@ -36,7 +33,6 @@ public abstract class BaseControllerConfig {
 
   @BeforeEach
   void setUp() {
-    userActivityMappingRepository.deleteAll();
     finalSettlementRepository.deleteAll();
     expenseRepository.deleteAll();
     activityRepository.deleteAll();

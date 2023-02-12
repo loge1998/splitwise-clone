@@ -14,8 +14,6 @@ import com.splitwise.controller.request.AddActivityRequest;
 import com.splitwise.controller.request.AddUserToActivityRequest;
 import com.splitwise.model.Activity;
 import com.splitwise.model.User;
-import com.splitwise.model.UserActivityMapping;
-import com.splitwise.model.UserActivityMappingId;
 
 public class ActivityControllerTest extends BaseControllerConfig {
 
@@ -57,8 +55,6 @@ public class ActivityControllerTest extends BaseControllerConfig {
         .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk());
 
-    assertTrue(userActivityMappingRepository.findById(new UserActivityMappingId(userToAdd.getId(), activity.getId()))
-      .isPresent());
   }
 
   @Test
@@ -103,10 +99,8 @@ public class ActivityControllerTest extends BaseControllerConfig {
   @Test
   public void getActivityByUserId_ShouldReturnAllActivityThatUserBelongsTo() throws Exception {
     User userToAdd = addUser(new User("testUser", "testEmail"));
-    Activity firstActivity = addActivity(new Activity("testActivity-1"));
-    Activity secondActivity = addActivity(new Activity("testActivity-2"));
-    addMapping(userToAdd.getId(), firstActivity.getId());
-    addMapping(userToAdd.getId(), secondActivity.getId());
+    Activity firstActivity = addActivity(new Activity("testActivity-1", List.of(userToAdd)));
+    Activity secondActivity = addActivity(new Activity("testActivity-2", List.of(userToAdd)));
 
     mvc.perform(MockMvcRequestBuilders.get("/activities")
         .queryParam("userid", String.valueOf(userToAdd.getId()))
@@ -116,10 +110,6 @@ public class ActivityControllerTest extends BaseControllerConfig {
       .andExpect(jsonPath("$.[0].id").value(firstActivity.getId()))
       .andExpect(jsonPath("$.[1].name").value(secondActivity.getName()))
       .andExpect(jsonPath("$.[1].id").value(secondActivity.getId()));
-  }
-
-  private UserActivityMapping addMapping(long userId, long activityId) {
-    return userActivityMappingRepository.save(new UserActivityMapping(new UserActivityMappingId(userId, activityId)));
   }
 
   private Activity addActivity(Activity activity) {

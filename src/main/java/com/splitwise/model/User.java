@@ -34,6 +34,10 @@ public class User {
   @JsonIgnore
   Set<Expense> expenses;
 
+  @ManyToMany(mappedBy = "users")
+  @JsonIgnore
+  Set<Activity> activities;
+
   @Column(name = "created_at")
   @JsonIgnore
   private LocalDateTime createdAt;

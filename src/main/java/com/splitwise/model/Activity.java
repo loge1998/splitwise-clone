@@ -3,6 +3,8 @@ package com.splitwise.model;
 import static com.splitwise.utils.Constants.timeZone;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
 
@@ -25,6 +27,14 @@ public class Activity {
   @Column(name = "name")
   private String name;
 
+  @ManyToMany
+  @JoinTable(
+    name = "user_activity_mapping",
+    joinColumns = @JoinColumn(name = "activity_id"),
+    inverseJoinColumns = @JoinColumn(name = "user_id"))
+  @JsonIgnore
+  Set<User> users;
+
   @Column(name = "created_at")
   @JsonIgnore
   private LocalDateTime createdAt;
@@ -35,6 +45,13 @@ public class Activity {
 
   public Activity(String name) {
     this.name = name;
+    this.createdAt = LocalDateTime.now(timeZone);
+    this.updatedAt = LocalDateTime.now(timeZone);
+  }
+
+  public Activity(String name, List<User> users) {
+    this.name = name;
+    this.users = new HashSet<>(users);
     this.createdAt = LocalDateTime.now(timeZone);
     this.updatedAt = LocalDateTime.now(timeZone);
   }
