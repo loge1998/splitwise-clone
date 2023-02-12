@@ -1,5 +1,11 @@
 version: '3.7'
 services:
+  service:
+    image: splitwise
+    hostname: splitwise
+    container_name: splitwise
+    ports:
+      - "9090:9090"
   postgres:
     image: postgres
     hostname: postgres

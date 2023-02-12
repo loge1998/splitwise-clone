@@ -6,13 +6,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.splitwise.controller.request.AddActivityRequest;
@@ -21,40 +16,12 @@ import com.splitwise.model.Activity;
 import com.splitwise.model.User;
 import com.splitwise.model.UserActivityMapping;
 import com.splitwise.model.UserActivityMappingId;
-import com.splitwise.repository.ActivityRepository;
-import com.splitwise.repository.UserActivityMappingRepository;
-import com.splitwise.repository.UserRepository;
-import com.splitwise.utils.JsonMessageParser;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-public class ActivityControllerTest {
-
-  @Autowired
-  private MockMvc mvc;
-
-  @Autowired
-  private ActivityRepository activityRepository;
-
-  @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private UserActivityMappingRepository userActivityMappingRepository;
-
-  @Autowired
-  private JsonMessageParser parser;
-
-  @BeforeEach
-  void setUp() {
-    userRepository.deleteAll();
-    activityRepository.deleteAll();
-    userActivityMappingRepository.deleteAll();
-  }
+public class ActivityControllerTest extends BaseControllerConfig {
 
   @Test
   public void shouldBeAbleToCreateActivity() throws Exception {
-    User creatingUser = addUser(new User("testUser","testEmail"));
+    User creatingUser = addUser(new User("testUser", "testEmail"));
     AddActivityRequest request = new AddActivityRequest("testActivity", List.of(creatingUser.getId()));
     String message = parser.toJson(request).get();
     mvc.perform(MockMvcRequestBuilders.post("/activities")

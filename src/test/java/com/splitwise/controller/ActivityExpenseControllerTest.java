@@ -13,13 +13,8 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.vavr.Tuple3;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -28,40 +23,17 @@ import com.splitwise.controller.response.FinalSettlementResponse;
 import com.splitwise.model.Activity;
 import com.splitwise.model.Expense;
 import com.splitwise.model.User;
-import com.splitwise.repository.ActivityRepository;
-import com.splitwise.repository.ExpenseRepository;
-import com.splitwise.repository.UserRepository;
-import com.splitwise.utils.JsonMessageParser;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class ActivityExpenseControllerTest {
-
-  @Autowired
-  private MockMvc mvc;
-
-  @Autowired
-  private ExpenseRepository expenseRepository;
-
-  @Autowired
-  private ActivityRepository activityRepository;
-
-  @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private JsonMessageParser parser;
-
-  @BeforeEach
-  void setUp() {
-    expenseRepository.deleteAll();
-    activityRepository.deleteAll();
-    userRepository.deleteAll();
-  }
+class ActivityExpenseControllerTest extends BaseControllerConfig {
 
   @Test
   void addExpenseToActivity_ShouldReturnNotFound_WhenActivityNotFound() throws Exception {
-    AddExpenseToActivityRequest request = new AddExpenseToActivityRequest(1L, "testDescription", BigDecimal.TEN, 2L, List.of(1L));
+    AddExpenseToActivityRequest request = new AddExpenseToActivityRequest(
+      1L,
+      "testDescription",
+      BigDecimal.TEN,
+      2L,
+      List.of(1L));
     String message = parser.toJson(request).get();
     mvc.perform(MockMvcRequestBuilders.post("/activities/1/expenses")
         .content(message)
@@ -75,9 +47,14 @@ class ActivityExpenseControllerTest {
   @Test
   void addExpenseToActivity_ShouldReturnNotFound_WhenUserIdNotFound() throws Exception {
     Activity addedActivity = addActivity(new Activity("testActivity"));
-    AddExpenseToActivityRequest request = new AddExpenseToActivityRequest(addedActivity.getId(), "testDescription", BigDecimal.TEN, 2L, List.of(1L));
+    AddExpenseToActivityRequest request = new AddExpenseToActivityRequest(
+      addedActivity.getId(),
+      "testDescription",
+      BigDecimal.TEN,
+      2L,
+      List.of(1L));
     String message = parser.toJson(request).get();
-    mvc.perform(MockMvcRequestBuilders.post("/activities/"+ addedActivity.getId() + "/expenses")
+    mvc.perform(MockMvcRequestBuilders.post("/activities/" + addedActivity.getId() + "/expenses")
         .content(message)
         .header("Content-Type", "application/json")
         .accept(MediaType.APPLICATION_JSON))
@@ -127,7 +104,7 @@ class ActivityExpenseControllerTest {
     Activity activity = activityRepository.save(new Activity("testActivity"));
     expenseRepository.save(new Expense("testDescription-1", user, BigDecimal.TEN, activity, Set.of()));
     expenseRepository.save(new Expense("testDescription-2", user, BigDecimal.ONE, activity, Set.of()));
-    mvc.perform(MockMvcRequestBuilders.get("/activities/"+ activity.getId() +"/expenses")
+    mvc.perform(MockMvcRequestBuilders.get("/activities/" + activity.getId() + "/expenses")
         .accept(MediaType.APPLICATION_JSON))
       .andDo(print())
       .andExpect(status().isOk())
@@ -158,11 +135,36 @@ class ActivityExpenseControllerTest {
     User user3 = addUser(new User("user3", "email3"));
     User user4 = addUser(new User("user4", "email4"));
 
-    Expense expense1 = expenseRepository.save(new Expense("testDesc1", user1, BigDecimal.valueOf(100), activity, Set.of(user2, user3, user4)));
-    Expense expense2 = expenseRepository.save(new Expense("testDesc2", user2, BigDecimal.valueOf(100), activity, Set.of(user1, user3, user4)));
-    Expense expense3 = expenseRepository.save(new Expense("testDesc3", user3, BigDecimal.valueOf(1000), activity, Set.of(user1, user2, user4)));
-    Expense expense4 = expenseRepository.save(new Expense("testDesc4", user4, BigDecimal.valueOf(500), activity, Set.of(user1, user2, user3)));
-    Expense expense5 = expenseRepository.save(new Expense("testDesc5", user2, BigDecimal.valueOf(1500), activity, Set.of(user1, user3, user4)));
+    Expense expense1 = expenseRepository.save(new Expense(
+      "testDesc1",
+      user1,
+      BigDecimal.valueOf(100),
+      activity,
+      Set.of(user2, user3, user4)));
+    Expense expense2 = expenseRepository.save(new Expense(
+      "testDesc2",
+      user2,
+      BigDecimal.valueOf(100),
+      activity,
+      Set.of(user1, user3, user4)));
+    Expense expense3 = expenseRepository.save(new Expense(
+      "testDesc3",
+      user3,
+      BigDecimal.valueOf(1000),
+      activity,
+      Set.of(user1, user2, user4)));
+    Expense expense4 = expenseRepository.save(new Expense(
+      "testDesc4",
+      user4,
+      BigDecimal.valueOf(500),
+      activity,
+      Set.of(user1, user2, user3)));
+    Expense expense5 = expenseRepository.save(new Expense(
+      "testDesc5",
+      user2,
+      BigDecimal.valueOf(1500),
+      activity,
+      Set.of(user1, user3, user4)));
 
     MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(
           "/activities/" + activity.getId() + "/prepare-settlements")
@@ -176,8 +178,11 @@ class ActivityExpenseControllerTest {
       new TypeReference<List<FinalSettlementResponse>>() {
       }).get();
 
-    List<Tuple3<Long, Long, String>> userTuples = response.stream()
-      .map(finalSettlement -> new Tuple3<>(finalSettlement.paidUser(), finalSettlement.borrowedUser(), finalSettlement.settlementAmount().toString()))
+    List<Tuple3<Long,Long,String>> userTuples = response.stream()
+      .map(finalSettlement -> new Tuple3<>(
+        finalSettlement.paidUser(),
+        finalSettlement.borrowedUser(),
+        finalSettlement.settlementAmount().toString()))
       .collect(Collectors.toList());
 
     assertTrue(userTuples.contains(new Tuple3<>(user3.getId(), user4.getId(), "125.00")));

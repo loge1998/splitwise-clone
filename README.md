@@ -26,5 +26,5 @@
 
 ### Database Schema design
 
-![Alt text](./docs/images/dbschema.png)
+![Alt text](./docs/images/dbschema-v2.png)
 
