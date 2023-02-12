@@ -5,6 +5,7 @@ import static com.splitwise.utils.Constants.timeZone;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
@@ -54,5 +55,18 @@ public class Activity {
     this.users = new HashSet<>(users);
     this.createdAt = LocalDateTime.now(timeZone);
     this.updatedAt = LocalDateTime.now(timeZone);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if(this == o) return true;
+    if(o == null || getClass() != o.getClass()) return false;
+    Activity activity = (Activity) o;
+    return id == activity.id && name.equals(activity.name);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, name);
   }
 }

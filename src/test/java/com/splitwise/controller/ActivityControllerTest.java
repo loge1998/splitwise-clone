@@ -6,8 +6,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import com.splitwise.controller.response.FinalSettlementResponse;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.splitwise.controller.request.AddActivityRequest;
@@ -102,14 +107,19 @@ public class ActivityControllerTest extends BaseControllerConfig {
     Activity firstActivity = addActivity(new Activity("testActivity-1", List.of(userToAdd)));
     Activity secondActivity = addActivity(new Activity("testActivity-2", List.of(userToAdd)));
 
-    mvc.perform(MockMvcRequestBuilders.get("/activities")
+    MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get("/activities")
         .queryParam("userid", String.valueOf(userToAdd.getId()))
         .accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.[0].name").value(firstActivity.getName()))
-      .andExpect(jsonPath("$.[0].id").value(firstActivity.getId()))
-      .andExpect(jsonPath("$.[1].name").value(secondActivity.getName()))
-      .andExpect(jsonPath("$.[1].id").value(secondActivity.getId()));
+      .andReturn();
+
+    List<Activity> response = parser.readValue(
+      mvcResult.getResponse().getContentAsString(),
+      new TypeReference<List<Activity>>() {
+      }).get();
+
+    assertTrue(response.contains(firstActivity));
+    assertTrue(response.contains(secondActivity));
   }
 
   private Activity addActivity(Activity activity) {
