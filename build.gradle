@@ -1,5 +1,5 @@
 plugins {
-  id 'com.bmuschko.docker-spring-boot-application' version '9.1.0'
+  id 'com.bmuschko.docker-spring-boot-application' version '9.2.0'
   id 'org.springframework.boot' version '2.7.6'
   id 'io.spring.dependency-management' version '1.1.0'
   id 'application'
@@ -48,7 +48,7 @@ dependencies {
 
 docker {
   springBootApplication {
-    baseImage = 'splitwise'
+    baseImage = 'eclipse-temurin:17.0.3_7-jre'
     maintainer = 'Logesh'
     ports = [9090]
   }

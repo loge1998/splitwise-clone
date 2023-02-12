@@ -28,3 +28,29 @@
 
 ![Alt text](./docs/images/dbschema-v2.png)
 
+
+### Step to Build and Test the service
+
+#### Build step
+
+```bash
+./gradlew clean assemble
+```
+
+#### Test step
+
+```bash
+./gradlew clean test
+```
+
+#### build Image Step
+
+```bash
+./gradlew clean dockerBuildImage
+```
+
+#### Step to run the service locally
+
+```bash
+docker-compose -f docker-compose.yml up -d
+```
