@@ -4,6 +4,7 @@ import static com.splitwise.utils.Constants.timeZone;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,6 +37,13 @@ public class Expense {
   @JoinColumn(name = "activity_id", nullable = false)
   private Activity activity;
 
+  @ManyToMany
+  @JoinTable(
+    name = "user_expense_mapping",
+    joinColumns = @JoinColumn(name = "expense_id"),
+    inverseJoinColumns = @JoinColumn(name = "user_id"))
+  Set<User> borrowedUsers;
+
   @Column(name = "created_at")
   @JsonIgnore
   private LocalDateTime createdAt;
@@ -44,11 +52,16 @@ public class Expense {
   @JsonIgnore
   private LocalDateTime updatedAt;
 
-  public Expense(String description, User userWhoPaid, BigDecimal totalAmount, Activity activity) {
+  public Expense(String description,
+    User userWhoPaid,
+    BigDecimal totalAmount,
+    Activity activity,
+    Set<User> borrowedUsers) {
     this.description = description;
     this.totalAmount = totalAmount;
     this.userWhoPaid = userWhoPaid;
     this.activity = activity;
+    this.borrowedUsers = borrowedUsers;
     this.createdAt = LocalDateTime.now(timeZone);
     this.updatedAt = LocalDateTime.now(timeZone);
   }

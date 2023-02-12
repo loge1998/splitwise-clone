@@ -4,6 +4,8 @@ import static com.splitwise.utils.Constants.timeZone;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Objects;
+import java.util.Set;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,6 +30,10 @@ public class User {
   @Column(name = "email_id", unique = true)
   private String emailId;
 
+  @ManyToMany(mappedBy = "borrowedUsers")
+  @JsonIgnore
+  Set<Expense> expenses;
+
   @Column(name = "created_at")
   @JsonIgnore
   private LocalDateTime createdAt;
@@ -41,5 +47,18 @@ public class User {
     this.emailId = emailId;
     this.createdAt = LocalDateTime.now(timeZone);
     this.updatedAt = LocalDateTime.now(timeZone);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if(this == o) return true;
+    if(o == null || getClass() != o.getClass()) return false;
+    User user = (User) o;
+    return id == user.id && name.equals(user.name) && emailId.equals(user.emailId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, name, emailId);
   }
 }

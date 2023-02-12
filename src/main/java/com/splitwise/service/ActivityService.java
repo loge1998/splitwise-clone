@@ -34,7 +34,7 @@ public class ActivityService {
   }
 
   public Activity addActivity(AddActivityRequest request) {
-    validateUserIds(request.userIds());
+    userService.validateUserIds(request.userIds());
     Activity savedActivity = activityRepository.save(new Activity(request.name()));
     request.userIds()
       .stream()
@@ -46,7 +46,7 @@ public class ActivityService {
 
   public void addUserToActivity(AddUserToActivityRequest request) {
     validateActivityId(request.activityId());
-    validateUserIds(request.userIds());
+    userService.validateUserIds(request.userIds());
     request.userIds()
       .stream()
       .map(userId -> new UserActivityMappingId(userId, request.activityId()))
@@ -59,25 +59,12 @@ public class ActivityService {
       .orElseThrow(() -> new ResourceNotFoundException("Received request with unknown activity: " + activityId));
   }
 
-  private void validateUserIds(List<Long> userIds) {
-    List<Long> unknownUserIds = userIds.stream()
-      .filter(Predicate.not(userService::checkIfUserPresent))
-      .collect(Collectors.toList());
-
-    if(!unknownUserIds.isEmpty())
-    {
-      String message = "Received request with unknown users: " + unknownUserIds;
-      log.error(message);
-      throw new ResourceNotFoundException(message);
-    }
-  }
-
   public Optional<Activity> getActivityById(long activityId) {
     return activityRepository.findById(activityId);
   }
 
   public List<Activity> getActivitiesByUserId(long userId) {
-    validateUserIds(List.of(userId));
+    userService.validateUserIds(List.of(userId));
     return userActivityMappingRepository.findByMappingIdUserId(userId)
       .stream()
       .flatMap(mapping -> getActivityById(mapping.getMappingId().getActivityId()).stream())
