@@ -2,12 +2,15 @@ server:
   port: 9090
 
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy: "ANT_PATH_MATCHER"
   datasource:
     hikari:
       connectionTimeout: 20000
       maximumPoolSize: ${POSTGRES_CONNECTION_POOL:2}
 
-    url: ${POSTGRES_CONNECT_URL:jdbc:postgresql://localhost:5432/postgres}
+    url: ${POSTGRES_CONNECT_URL:jdbc:postgresql://postgres:5432/postgres}
     username: ${POSTGRES_USERNAME:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
   jpa:

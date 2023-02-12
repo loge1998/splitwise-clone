@@ -2,6 +2,9 @@ server:
   port: 9090
 
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy: "ANT_PATH_MATCHER"
   datasource:
     hikari:
       connectionTimeout: 20000

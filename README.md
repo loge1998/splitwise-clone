@@ -54,3 +54,11 @@
 ```bash
 docker-compose -f docker-compose.yml up -d
 ```
+
+### Swagger Documentation
+
+You can access swagger docs from this url
+
+```bash
+http://localhost:9090/swagger-ui/
+```
